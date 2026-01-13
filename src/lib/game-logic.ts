@@ -109,6 +109,7 @@ export function createGame(
     currentTeamIndex: 0,
     currentClue: null,
     guessesRemaining: 0,
+    guessesThisTurn: 0,
     
     // Players & scoring
     players: [],
@@ -137,6 +138,7 @@ export function regenerateBoard(game: Game): Game {
     currentTeamIndex: 0,
     currentClue: null,
     guessesRemaining: 0,
+    guessesThisTurn: 0,
     scores: initializeScores(game.settings),
     eliminatedTeams: [],
     winner: null,

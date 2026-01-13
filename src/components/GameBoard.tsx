@@ -148,8 +148,8 @@ export function GameBoard({
               })}
             </div>
 
-            {/* End Turn Button */}
-            {canGuess && gameState.currentClue && (
+            {/* End Turn Button - only show after at least one guess */}
+            {canGuess && gameState.currentClue && gameState.guessesThisTurn > 0 && (
               <div className="mt-4 text-center">
                 <button onClick={onEndTurn} className="btn btn-secondary">
                   End Turn

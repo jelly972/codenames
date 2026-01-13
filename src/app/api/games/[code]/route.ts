@@ -39,6 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       currentTeamIndex: game.currentTeamIndex,
       currentClue: game.currentClue,
       guessesRemaining: game.guessesRemaining,
+      guessesThisTurn: game.guessesThisTurn,
       players: game.players,
       scores: game.scores,
       eliminatedTeams: game.eliminatedTeams,

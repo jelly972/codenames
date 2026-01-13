@@ -34,6 +34,7 @@ function toClientState(game: Game): ClientGameState {
     currentTeamIndex: game.currentTeamIndex,
     currentClue: game.currentClue,
     guessesRemaining: game.guessesRemaining,
+    guessesThisTurn: game.guessesThisTurn,
     players: game.players,
     scores: game.scores,
     eliminatedTeams: game.eliminatedTeams,
@@ -325,6 +326,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
         game.currentClue = { word: clueWord, count: data.count };
         // Allow count + 1 guesses (the +1 is for catching up)
         game.guessesRemaining = data.count === 0 ? Infinity : data.count + 1;
+        game.guessesThisTurn = 0;
         await saveGame(game);
 
         await broadcastGameState(io, game);
@@ -379,6 +381,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
         game.revealed[wordIndex] = true;
         const cardType = game.keyCard[wordIndex];
         game.guessesRemaining--;
+        game.guessesThisTurn++;
 
         // Handle the guess result
         if (cardType === 'assassin') {
@@ -486,6 +489,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
 function advanceToNextTeam(game: Game) {
   game.currentClue = null;
   game.guessesRemaining = 0;
+  game.guessesThisTurn = 0;
 
   // Find next non-eliminated team
   let attempts = 0;

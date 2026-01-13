@@ -55,6 +55,7 @@ export interface Game {
   currentTeamIndex: number;
   currentClue: Clue | null;
   guessesRemaining: number;
+  guessesThisTurn: number;
 
   // Players & scoring
   players: Player[];
@@ -117,6 +118,7 @@ export interface ClientGameState {
   currentTeamIndex: number;
   currentClue: Clue | null;
   guessesRemaining: number;
+  guessesThisTurn: number;
   players: Player[];
   scores: Record<TeamId, TeamScore>;
   eliminatedTeams: TeamId[];
