@@ -1,65 +1,277 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
+import { BoardSize, GameSettings, getDefaultSettings } from '@/types/game';
 
 export default function Home() {
+  const router = useRouter();
+  const [mode, setMode] = useState<'menu' | 'create' | 'join'>('menu');
+  const [nickname, setNickname] = useState('');
+  const [roomCode, setRoomCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Game settings for create mode
+  const [boardSize, setBoardSize] = useState<BoardSize>('standard');
+  const [teamCount, setTeamCount] = useState<2 | 3 | 4>(2);
+
+  const handleCreateGame = async () => {
+    if (!nickname.trim()) {
+      setError('Please enter a nickname');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const settings = getDefaultSettings(boardSize, teamCount);
+      
+      const response = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create game');
+      }
+
+      const data = await response.json();
+      
+      // Store player info in session storage
+      const playerId = uuidv4();
+      sessionStorage.setItem('playerId', playerId);
+      sessionStorage.setItem('playerName', nickname.trim());
+      sessionStorage.setItem('isHost', 'true');
+
+      // Navigate to the game room
+      router.push(`/room/${data.code}`);
+    } catch (err) {
+      setError('Failed to create game. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const handleJoinGame = async () => {
+    if (!nickname.trim()) {
+      setError('Please enter a nickname');
+      return;
+    }
+    if (!roomCode.trim()) {
+      setError('Please enter a room code');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Verify game exists
+      const response = await fetch(`/api/games/${roomCode.toUpperCase()}`);
+      
+      if (!response.ok) {
+        throw new Error('Game not found');
+      }
+
+      // Store player info in session storage
+      const playerId = uuidv4();
+      sessionStorage.setItem('playerId', playerId);
+      sessionStorage.setItem('playerName', nickname.trim());
+      sessionStorage.setItem('isHost', 'false');
+
+      // Navigate to the game room
+      router.push(`/room/${roomCode.toUpperCase()}`);
+    } catch (err) {
+      setError('Game not found. Please check the room code.');
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen flex flex-col items-center justify-center p-6">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--team-red)] opacity-5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--team-blue)] opacity-5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold tracking-tight mb-3">
+            <span className="text-[var(--team-red)]">CODE</span>
+            <span className="text-[var(--team-blue)]">NAMES</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          <p className="text-[#6b7280] text-lg">The word guessing party game</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {/* Main Menu */}
+        {mode === 'menu' && (
+          <div className="space-y-4 animate-fade-in">
+            <button
+              onClick={() => setMode('create')}
+              className="btn btn-primary w-full text-lg py-4"
+            >
+              Create Game
+            </button>
+            <button
+              onClick={() => setMode('join')}
+              className="btn btn-secondary w-full text-lg py-4"
+            >
+              Join Game
+            </button>
+          </div>
+        )}
+
+        {/* Create Game Form */}
+        {mode === 'create' && (
+          <div className="space-y-6 animate-fade-in">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
+                Your Nickname
+              </label>
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="Enter your nickname"
+                className="input w-full"
+                maxLength={20}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
+                Board Size
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['small', 'standard', 'large'] as BoardSize[]).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setBoardSize(size)}
+                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                      boardSize === size
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--accent)]'
+                    }`}
+                  >
+                    <div className="text-sm">{size.charAt(0).toUpperCase() + size.slice(1)}</div>
+                    <div className="text-xs opacity-60">
+                      {size === 'small' ? '4×4' : size === 'standard' ? '5×5' : '6×6'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
+                Number of Teams
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {([2, 3, 4] as const).map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => setTeamCount(count)}
+                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                      teamCount === count
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--accent)]'
+                    }`}
+                  >
+                    {count} Teams
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-[var(--team-red)] text-sm">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMode('menu')}
+                className="btn btn-secondary flex-1"
+                disabled={isLoading}
+              >
+                Back
+              </button>
+              <button
+                onClick={handleCreateGame}
+                className="btn btn-primary flex-1"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating...' : 'Create Room'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Join Game Form */}
+        {mode === 'join' && (
+          <div className="space-y-6 animate-fade-in">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
+                Your Nickname
+              </label>
+              <input
+                type="text"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="Enter your nickname"
+                className="input w-full"
+                maxLength={20}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
+                Room Code
+              </label>
+              <input
+                type="text"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                placeholder="Enter 6-character code"
+                className="input w-full text-center text-2xl tracking-widest font-mono"
+                maxLength={6}
+              />
+            </div>
+
+            {error && (
+              <p className="text-[var(--team-red)] text-sm">{error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMode('menu')}
+                className="btn btn-secondary flex-1"
+                disabled={isLoading}
+              >
+                Back
+              </button>
+              <button
+                onClick={handleJoinGame}
+                className="btn btn-primary flex-1"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Joining...' : 'Join Room'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <p className="text-center text-[#4b5563] text-sm mt-12">
+          Based on the board game by Vlaada Chvátil
+        </p>
+      </div>
+    </main>
   );
 }
