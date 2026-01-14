@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
-import { BoardSize, GameSettings, getDefaultSettings } from '@/types/game';
+import { getDefaultSettings } from '@/types/game';
 
 export default function Home() {
   const router = useRouter();
@@ -12,10 +12,6 @@ export default function Home() {
   const [roomCode, setRoomCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Game settings for create mode
-  const [boardSize, setBoardSize] = useState<BoardSize>('standard');
-  const [teamCount, setTeamCount] = useState<2 | 3 | 4>(2);
 
   const handleCreateGame = async () => {
     if (!nickname.trim()) {
@@ -27,7 +23,8 @@ export default function Home() {
     setError(null);
 
     try {
-      const settings = getDefaultSettings(boardSize, teamCount);
+      // Use default settings - host can change these in the lobby
+      const settings = getDefaultSettings('standard', 2);
       
       const response = await fetch('/api/games', {
         method: 'POST',
@@ -144,50 +141,9 @@ export default function Home() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
-                Board Size
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['small', 'standard', 'large'] as BoardSize[]).map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setBoardSize(size)}
-                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
-                      boardSize === size
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--accent)]'
-                    }`}
-                  >
-                    <div className="text-sm">{size.charAt(0).toUpperCase() + size.slice(1)}</div>
-                    <div className="text-xs opacity-60">
-                      {size === 'small' ? '4×4' : size === 'standard' ? '5×5' : '6×6'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-[#9ca3af]">
-                Number of Teams
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {([2, 3, 4] as const).map((count) => (
-                  <button
-                    key={count}
-                    onClick={() => setTeamCount(count)}
-                    className={`py-3 px-4 rounded-lg font-medium transition-all ${
-                      teamCount === count
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--accent)]'
-                    }`}
-                  >
-                    {count} Teams
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="text-sm text-[#6b7280]">
+              You can configure game settings in the lobby after creating the room.
+            </p>
 
             {error && (
               <p className="text-[var(--team-red)] text-sm">{error}</p>
