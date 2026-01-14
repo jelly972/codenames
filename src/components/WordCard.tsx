@@ -133,9 +133,9 @@ export function WordCard({
       onClick={onClick}
       disabled={!canClick || isRevealed}
       className={`
-        word-card relative aspect-[4/3] lg:aspect-[3/2] rounded-lg border-2 p-2 lg:p-3
+        word-card relative aspect-[5/4] sm:aspect-[4/3] lg:aspect-[3/2] rounded sm:rounded-lg border sm:border-2 px-0.5 py-0 sm:p-2 lg:p-3
         flex items-center justify-center text-center font-bold
-        transition-all duration-200
+        transition-all duration-200 min-w-0 overflow-hidden
         ${isRevealed ? 'revealed opacity-80' : ''}
         ${canClick && !isRevealed ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
         ${!canClick && !isRevealed ? 'disabled' : ''}
@@ -146,14 +146,14 @@ export function WordCard({
       {/* Revealed assassin - full card X overlay */}
       {isRevealedAssassin && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <CrosshairIcon className="w-full h-full text-purple-500 opacity-40 p-2" />
+          <CrosshairIcon className="w-full h-full text-purple-500 opacity-40 p-0.5 sm:p-2" />
         </div>
       )}
 
       {/* Word text */}
       <span
         className={`
-          relative z-10 text-xs sm:text-sm lg:text-base uppercase tracking-wide
+          relative z-10 text-[10px] sm:text-xs lg:text-base uppercase tracking-tight sm:tracking-wide leading-tight break-all
           ${isRevealed && !isRevealedAssassin ? 'line-through opacity-70' : ''}
           ${isRevealedAssassin ? 'text-purple-400' : ''}
         `}
@@ -165,21 +165,21 @@ export function WordCard({
       {spymasterCardType && !isRevealed && (
         <>
           {spymasterCardType === 'assassin' ? (
-            <div className="absolute top-1 right-1 w-5 h-5 text-purple-500">
+            <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-3 h-3 sm:w-5 sm:h-5 text-purple-500">
               <CrosshairIcon className="w-full h-full" />
             </div>
           ) : (
             <div
-              className="absolute top-1 right-1 w-2 h-2 rounded-full"
+              className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
               style={{ backgroundColor: CARD_STYLES[spymasterCardType].border }}
             />
           )}
         </>
       )}
 
-      {/* Assassin label for spymaster view */}
+      {/* Assassin label for spymaster view - hidden on small screens */}
       {spymasterCardType === 'assassin' && !isRevealed && (
-        <span className="absolute bottom-1 left-1 text-[10px] uppercase tracking-wider text-purple-500 font-bold opacity-60">
+        <span className="absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1 text-[6px] sm:text-[10px] uppercase tracking-wider text-purple-500 font-bold opacity-60 hidden sm:block">
           DEATH
         </span>
       )}

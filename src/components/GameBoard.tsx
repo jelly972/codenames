@@ -49,32 +49,32 @@ export function GameBoard({
   const canGiveClue = isMyTurn && isSpymaster && gameState.currentClue === null;
 
   return (
-    <main className="min-h-screen p-4 lg:p-6">
+    <main className="min-h-screen min-h-dvh p-2 sm:p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="flex items-center justify-between mb-4">
-          <button onClick={onLeave} className="btn btn-secondary text-sm">
+        <header className="flex items-center justify-between mb-2 sm:mb-4">
+          <button onClick={onLeave} className="btn btn-secondary text-xs sm:text-sm py-1.5 px-2 sm:py-2 sm:px-4">
             ← Leave
           </button>
 
           <div className="text-center">
-            <h1 className="text-xl font-bold">
+            <h1 className="text-lg sm:text-xl font-bold">
               <span className="text-[var(--team-red)]">CODE</span>
               <span className="text-[var(--team-blue)]">NAMES</span>
             </h1>
-            <p className="text-xs text-[#6b7280]">Room: {gameState.code}</p>
+            <p className="text-[10px] sm:text-xs text-[#6b7280]">Room: {gameState.code}</p>
           </div>
 
-          <div className="text-right text-sm">
-            <p className="text-[#6b7280]">{currentPlayer?.name}</p>
+          <div className="text-right text-xs sm:text-sm">
+            <p className="text-[#6b7280] truncate max-w-[60px] sm:max-w-none">{currentPlayer?.name}</p>
             <p className="capitalize" style={{ color: TEAM_COLORS[currentPlayer?.team || 'red'] }}>
               {currentPlayer?.team} {currentPlayer?.role}
             </p>
           </div>
         </header>
 
-        <div className="grid lg:grid-cols-4 gap-4">
-          {/* Scoreboard */}
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
+          {/* Scoreboard - below board on mobile, left side on desktop */}
           <div className="lg:col-span-1 order-2 lg:order-1">
             <ScoreBoard
               gameState={gameState}
@@ -82,25 +82,25 @@ export function GameBoard({
             />
           </div>
 
-          {/* Game Board */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
+          {/* Game Board - first on mobile, right side on desktop */}
+          <div className="lg:col-span-3 order-1 lg:order-2 min-w-0">
             {/* Turn Indicator */}
             <div
-              className="mb-4 p-3 rounded-lg text-center font-medium"
+              className="mb-2 sm:mb-4 p-2 sm:p-3 rounded-lg text-center font-medium text-xs sm:text-base"
               style={{
                 backgroundColor: TEAM_COLORS[currentTeam] + '20',
                 borderLeft: `4px solid ${TEAM_COLORS[currentTeam]}`,
               }}
             >
               <span className="capitalize" style={{ color: TEAM_COLORS[currentTeam] }}>
-                {currentTeam} Team&apos;s Turn
+                {currentTeam}&apos;s Turn
               </span>
               {gameState.currentClue && (
-                <span className="ml-4 text-white">
-                  Clue: <strong>{gameState.currentClue.word}</strong> ({gameState.currentClue.count})
+                <span className="ml-2 sm:ml-4 text-white">
+                  <strong>{gameState.currentClue.word}</strong> ({gameState.currentClue.count})
                   {gameState.guessesRemaining < Infinity && (
-                    <span className="ml-2 text-[#9ca3af]">
-                      ({gameState.guessesRemaining} guesses left)
+                    <span className="ml-1 sm:ml-2 text-[#9ca3af]">
+                      ({gameState.guessesRemaining} left)
                     </span>
                   )}
                 </span>
@@ -109,23 +109,23 @@ export function GameBoard({
 
             {/* Clue Input for Spymaster */}
             {canGiveClue && (
-              <div className="mb-4">
+              <div className="mb-2 sm:mb-4">
                 <ClueInput onSubmit={onGiveClue} />
               </div>
             )}
 
             {/* Waiting for clue message */}
             {isMyTurn && !isSpymaster && !gameState.currentClue && (
-              <div className="mb-4 p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-center">
-                <p className="text-[#9ca3af]">Waiting for your spymaster to give a clue...</p>
+              <div className="mb-2 sm:mb-4 p-2 sm:p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-center">
+                <p className="text-[#9ca3af] text-xs sm:text-base">Waiting for your spymaster to give a clue...</p>
               </div>
             )}
 
             {/* Word Grid */}
             <div
-              className="grid gap-2 lg:gap-3"
+              className="grid gap-0.5 sm:gap-2 lg:gap-3"
               style={{
-                gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
               }}
             >
               {gameState.words.map((word, index) => {
@@ -150,8 +150,8 @@ export function GameBoard({
 
             {/* End Turn Button - only show after at least one guess */}
             {canGuess && gameState.currentClue && gameState.guessesThisTurn > 0 && (
-              <div className="mt-4 text-center">
-                <button onClick={onEndTurn} className="btn btn-secondary">
+              <div className="mt-2 sm:mt-4 text-center">
+                <button onClick={onEndTurn} className="btn btn-secondary text-sm">
                   End Turn
                 </button>
               </div>
@@ -159,10 +159,10 @@ export function GameBoard({
 
             {/* Not your turn message */}
             {!isMyTurn && (
-              <div className="mt-4 text-center text-[#6b7280]">
+              <div className="mt-2 sm:mt-4 text-center text-[#6b7280] text-xs sm:text-base">
                 Waiting for{' '}
                 <span className="capitalize" style={{ color: TEAM_COLORS[currentTeam] }}>
-                  {currentTeam} team
+                  {currentTeam}
                 </span>{' '}
                 to play...
               </div>

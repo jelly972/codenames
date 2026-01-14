@@ -29,37 +29,34 @@ export function ClueInput({ onSubmit }: ClueInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4"
+      className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-2 sm:p-4"
     >
-      <h3 className="text-sm font-medium text-[#9ca3af] mb-3">
-        Give a Clue to Your Team
+      <h3 className="text-xs sm:text-sm font-medium text-[#9ca3af] mb-2 sm:mb-3">
+        Give a Clue
       </h3>
       
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
+      <div className="flex flex-row gap-2 sm:gap-3">
+        <div className="flex-1 min-w-0">
           <input
             type="text"
             value={word}
             onChange={(e) => setWord(e.target.value.replace(/\s/g, ''))}
-            placeholder="One word clue..."
-            className="input w-full"
+            placeholder="One word..."
+            className="input w-full text-sm sm:text-base py-1.5 sm:py-2"
             maxLength={30}
             autoFocus
             required
           />
-          <p className="text-xs text-[#6b7280] mt-1">
-            Must be a single word, no spaces
-          </p>
         </div>
 
-        <div className="w-24">
-          <label className="block text-xs text-[#6b7280] mb-1">Count</label>
+        <div className="w-16 sm:w-24 shrink-0">
           <select
             value={count}
             onChange={(e) => setCount(parseInt(e.target.value))}
-            className="input w-full"
+            className="input w-full text-sm sm:text-base py-1.5 sm:py-2"
+            aria-label="Count"
           >
-            <option value={0}>∞ (unlimited)</option>
+            <option value={0}>∞</option>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
               <option key={n} value={n}>
                 {n}
@@ -68,13 +65,13 @@ export function ClueInput({ onSubmit }: ClueInputProps) {
           </select>
         </div>
 
-        <div className="flex items-end">
+        <div className="shrink-0">
           <button
             type="submit"
             disabled={!word.trim() || isSubmitting}
-            className="btn btn-primary"
+            className="btn btn-primary py-1.5 px-2 sm:py-2 sm:px-4 text-sm"
           >
-            Give Clue
+            <span className="hidden sm:inline">Give</span> Clue
           </button>
         </div>
       </div>
