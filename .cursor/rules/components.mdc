@@ -1,0 +1,20 @@
+---
+description: Rules for React components
+globs: src/components/**/*.tsx, src/app/**/*.tsx
+---
+
+# React Component Guidelines
+
+## Component Structure
+- Use functional components with hooks
+- Props should be typed inline for simple components
+- Extract complex prop types to interfaces with `Props` suffix
+
+## Naming
+- PascalCase for component files and names
+- Components should have descriptive, specific names
+
+## Patterns
+- Use the `useGame` hook for game state access
+- Keep components focused - split large components
+- Colocate component-specific styles when possible

@@ -1,0 +1,21 @@
+---
+description: Rules for game logic and backend code
+globs: src/lib/**/*.ts, src/types/**/*.ts, server.ts
+---
+
+# Game Logic Guidelines
+
+## Pure Functions
+- Game logic in `src/lib/` should be pure when possible
+- Avoid side effects in game state calculations
+- Keep Redis/Socket.io interactions separate from core logic
+
+## Testing
+- Write tests for game logic functions (use Vitest)
+- Test files use `.test.ts` suffix
+- Cover edge cases and game state transitions
+
+## Type Safety
+- Define game types in `src/types/game.ts`
+- Use discriminated unions for game states
+- Validate external input at API boundaries

@@ -1,0 +1,26 @@
+---
+description: General project conventions for Codename word game
+---
+
+# Codename - Word Game Project
+
+## Tech Stack
+- Next.js 14+ with App Router
+- TypeScript (strict mode)
+- Socket.io for real-time multiplayer
+- Redis for game state persistence
+- Vitest for testing
+
+## Project Structure
+- `src/app/` - Next.js pages and API routes
+- `src/components/` - React components
+- `src/hooks/` - Custom React hooks
+- `src/lib/` - Core game logic and utilities
+- `src/types/` - TypeScript type definitions
+
+## General Guidelines
+- Prefer functional programming patterns
+- Keep game logic pure and testable in `src/lib/`
+- Use existing abstractions before creating new ones
+- Follow established naming conventions in the codebase
+

@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+when ever you need to execute node command, do not use npx, use node directly
