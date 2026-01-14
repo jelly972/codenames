@@ -84,12 +84,20 @@ export default function RoomPage() {
           {error && (
             <div className="mt-4">
               <p className="text-[var(--team-red)]">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="btn btn-secondary mt-4"
-              >
-                Refresh Page
-              </button>
+              <div className="flex gap-3 justify-center mt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="btn btn-secondary"
+                >
+                  Refresh Page
+                </button>
+                <button
+                  onClick={() => router.push('/')}
+                  className="btn btn-primary"
+                >
+                  Go to Home
+                </button>
+              </div>
             </div>
           )}
         </div>
