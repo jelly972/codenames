@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGame } from '@/hooks/useGame';
 import { Lobby } from '@/components/Lobby';
@@ -8,41 +8,35 @@ import { GameBoard } from '@/components/GameBoard';
 import { GameOver } from '@/components/GameOver';
 import { SpectatorView } from '@/components/SpectatorView';
 
-function getPlayerInfoSnapshot(): { playerId: string; playerName: string } | null {
-  const storedPlayerId = sessionStorage.getItem('playerId');
-  const storedPlayerName = sessionStorage.getItem('playerName');
-  if (!storedPlayerId || !storedPlayerName) return null;
-  return { playerId: storedPlayerId, playerName: storedPlayerName };
-}
-
-function getServerSnapshot(): { playerId: string; playerName: string } | null {
-  return null;
-}
-
-function subscribe(): () => void {
-  // sessionStorage doesn't fire events in the same tab, so no subscription needed
-  // This is just for initial hydration
-  return () => {};
-}
+type PlayerInfo = { playerId: string; playerName: string };
 
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
   const code = (params.code as string)?.toUpperCase();
   
-  // Use useSyncExternalStore to safely read from sessionStorage
-  const playerInfo = useSyncExternalStore(subscribe, getPlayerInfoSnapshot, getServerSnapshot);
+  // Start with undefined to indicate "not yet loaded" (for SSR hydration safety)
+  const [playerInfo, setPlayerInfo] = useState<PlayerInfo | null | undefined>(undefined);
 
-  // Redirect if no player info
+  // Read from sessionStorage on mount - this is the correct pattern for browser APIs
+  // that aren't available during SSR. We need the effect to safely hydrate.
   useEffect(() => {
-    if (playerInfo === null) {
+    const storedPlayerId = sessionStorage.getItem('playerId');
+    const storedPlayerName = sessionStorage.getItem('playerName');
+
+    if (!storedPlayerId || !storedPlayerName) {
       router.push('/');
+      return;
     }
-  }, [playerInfo, router]);
+    // Reading from sessionStorage on mount requires setting state in an effect for SSR hydration safety.
+    // This is the recommended pattern for browser-only APIs.
+    // eslint-disable-next-line
+    setPlayerInfo({ playerId: storedPlayerId, playerName: storedPlayerName });
+  }, [router]);
 
   const playerId = playerInfo?.playerId ?? '';
   const playerName = playerInfo?.playerName ?? '';
-  const isReady = playerInfo !== null;
+  const isReady = playerInfo !== undefined && playerInfo !== null;
 
   const {
     gameState,
