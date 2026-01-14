@@ -24,10 +24,11 @@ interface UseGameReturn {
   error: string | null;
   currentPlayer: Player | null;
   isSpymaster: boolean;
+  isSpectator: boolean;
   isMyTurn: boolean;
   
   // Actions
-  selectTeam: (team: TeamId | null, role: 'spymaster' | 'operative' | null) => void;
+  selectTeam: (team: TeamId | null, role: 'spymaster' | 'operative' | 'spectator' | null) => void;
   updateSettings: (settings: Partial<GameSettings>) => void;
   startGame: () => void;
   giveClue: (word: string, count: number) => void;
@@ -151,11 +152,12 @@ export function useGame({ gameCode, playerId, playerName }: UseGameOptions): Use
   // Derived state
   const currentPlayer = gameState?.players.find((p) => p.id === playerId) || null;
   const isSpymaster = currentPlayer?.role === 'spymaster';
+  const isSpectator = currentPlayer?.role === 'spectator';
   const currentTeam = gameState ? gameState.teams[gameState.currentTeamIndex] : null;
-  const isMyTurn = currentPlayer?.team === currentTeam;
+  const isMyTurn = currentPlayer?.team === currentTeam && !isSpectator;
 
   // Actions
-  const selectTeam = useCallback((team: TeamId | null, role: 'spymaster' | 'operative' | null) => {
+  const selectTeam = useCallback((team: TeamId | null, role: 'spymaster' | 'operative' | 'spectator' | null) => {
     socketRef.current?.emit('select_team', { team, role });
   }, []);
 
@@ -191,6 +193,7 @@ export function useGame({ gameCode, playerId, playerName }: UseGameOptions): Use
     error,
     currentPlayer,
     isSpymaster,
+    isSpectator,
     isMyTurn,
     selectTeam,
     updateSettings,

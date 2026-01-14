@@ -207,8 +207,8 @@ export function setupSocketHandlers(io: SocketIOServer) {
       }
     });
 
-    // Select team and role
-    socket.on('select_team', async (data: { team: TeamId | null; role: 'spymaster' | 'operative' | null }) => {
+    // Select team and role (including spectator)
+    socket.on('select_team', async (data: { team: TeamId | null; role: 'spymaster' | 'operative' | 'spectator' | null }) => {
       const playerInfo = socketPlayers.get(socket.id);
       if (!playerInfo) return;
 
@@ -220,6 +220,15 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
         const player = game.players.find((p) => p.id === playerId);
         if (!player) return;
+
+        // Spectators don't need a team
+        if (data.role === 'spectator') {
+          player.team = null;
+          player.role = 'spectator';
+          await saveGame(game);
+          await broadcastGameState(io, game);
+          return;
+        }
 
         // Check if spymaster role is already taken for this team
         if (data.role === 'spymaster' && data.team) {

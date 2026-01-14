@@ -46,7 +46,7 @@ export interface SocketEvents {
   join_room: (data: { gameCode: string; playerId: string; playerName: string }) => void;
   leave_room: () => void;
   update_settings: (data: { settings: Partial<GameSettings> }) => void;
-  select_team: (data: { team: TeamId | null; role: 'spymaster' | 'operative' | null }) => void;
+  select_team: (data: { team: TeamId | null; role: 'spymaster' | 'operative' | 'spectator' | null }) => void;
   start_game: () => void;
   give_clue: (data: { word: string; count: number }) => void;
   guess_word: (data: { wordIndex: number }) => void;

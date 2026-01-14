@@ -66,11 +66,13 @@ export interface Game {
   createdAt: number;
 }
 
+export type PlayerRole = 'spymaster' | 'operative' | 'spectator';
+
 export interface Player {
   id: string;
   name: string;
   team: TeamId | null;
-  role: 'spymaster' | 'operative' | null;
+  role: PlayerRole | null;
   isHost: boolean;
 }
 

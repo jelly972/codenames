@@ -18,7 +18,7 @@ interface LobbyProps {
   gameState: ClientGameState | SpymasterGameState;
   currentPlayer: Player | null;
   playerId: string;
-  onSelectTeam: (team: TeamId | null, role: 'spymaster' | 'operative' | null) => void;
+  onSelectTeam: (team: TeamId | null, role: 'spymaster' | 'operative' | 'spectator' | null) => void;
   onUpdateSettings: (settings: Partial<GameSettings>) => void;
   onStartGame: () => void;
   onLeave: () => void;
@@ -195,7 +195,7 @@ export function Lobby({
               <h3 className="text-sm font-medium text-[#9ca3af] mb-3">Unassigned Players</h3>
               <div className="flex flex-wrap gap-2">
                 {gameState.players
-                  .filter((p) => !p.team)
+                  .filter((p) => !p.team && p.role !== 'spectator')
                   .map((player) => (
                     <span
                       key={player.id}
@@ -209,10 +209,55 @@ export function Lobby({
                       {player.isHost && ' 👑'}
                     </span>
                   ))}
-                {gameState.players.filter((p) => !p.team).length === 0 && (
-                  <span className="text-[#4b5563] text-sm">All players have joined teams</span>
+                {gameState.players.filter((p) => !p.team && p.role !== 'spectator').length === 0 && (
+                  <span className="text-[#4b5563] text-sm">All players have joined teams or are spectating</span>
                 )}
               </div>
+            </div>
+
+            {/* Spectators */}
+            <div className="mt-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-[#9ca3af]">
+                  Spectators ({gameState.players.filter((p) => p.role === 'spectator').length})
+                </h3>
+                {currentPlayer?.role !== 'spectator' && (
+                  <button
+                    onClick={() => onSelectTeam(null, 'spectator')}
+                    className="text-xs text-[#6b7280] hover:text-white transition-colors px-2 py-1 rounded border border-[var(--card-border)] hover:border-[var(--accent)]"
+                  >
+                    👁 Watch as Spectator
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {gameState.players
+                  .filter((p) => p.role === 'spectator')
+                  .map((player) => (
+                    <span
+                      key={player.id}
+                      className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
+                        player.id === playerId
+                          ? 'bg-[#6b7280] text-white'
+                          : 'bg-[var(--background)] border border-[var(--card-border)] text-[#9ca3af]'
+                      }`}
+                    >
+                      👁 {player.name}
+                      {player.isHost && ' 👑'}
+                    </span>
+                  ))}
+                {gameState.players.filter((p) => p.role === 'spectator').length === 0 && (
+                  <span className="text-[#4b5563] text-sm">No spectators</span>
+                )}
+              </div>
+              {currentPlayer?.role === 'spectator' && (
+                <button
+                  onClick={() => onSelectTeam(null, null)}
+                  className="mt-3 text-sm text-[#6b7280] hover:text-white transition-colors"
+                >
+                  Leave spectator mode
+                </button>
+              )}
             </div>
           </div>
         </div>

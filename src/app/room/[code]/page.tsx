@@ -6,6 +6,7 @@ import { useGame } from '@/hooks/useGame';
 import { Lobby } from '@/components/Lobby';
 import { GameBoard } from '@/components/GameBoard';
 import { GameOver } from '@/components/GameOver';
+import { SpectatorView } from '@/components/SpectatorView';
 
 export default function RoomPage() {
   const params = useParams();
@@ -39,6 +40,7 @@ export default function RoomPage() {
     error,
     currentPlayer,
     isSpymaster,
+    isSpectator,
     isMyTurn,
     selectTeam,
     updateSettings,
@@ -117,7 +119,7 @@ export default function RoomPage() {
         />
       )}
 
-      {gameState.status === 'playing' && (
+      {gameState.status === 'playing' && !isSpectator && (
         <GameBoard
           gameState={gameState}
           currentPlayer={currentPlayer}
@@ -127,6 +129,14 @@ export default function RoomPage() {
           onGiveClue={giveClue}
           onGuessWord={guessWord}
           onEndTurn={endTurn}
+          onLeave={handleLeave}
+        />
+      )}
+
+      {gameState.status === 'playing' && isSpectator && (
+        <SpectatorView
+          gameState={gameState}
+          currentPlayer={currentPlayer}
           onLeave={handleLeave}
         />
       )}
