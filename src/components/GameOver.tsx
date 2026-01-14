@@ -17,8 +17,8 @@ export function GameOver({ gameState, onLeave }: GameOverProps) {
   const activeTeams = TEAM_ORDER.slice(0, gameState.settings.teamCount);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-lg w-full text-center">
+    <main className="min-h-screen flex flex-col items-center justify-start sm:justify-center p-6 overflow-y-auto">
+      <div className="max-w-lg w-full text-center py-4">
         {/* Winner announcement */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Game Over!</h1>
