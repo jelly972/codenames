@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { getRandomWords, WORD_LIST } from './words';
 
+describe('WORD_LIST', () => {
+  it('should not contain any duplicate words', () => {
+    const uniqueWords = new Set(WORD_LIST);
+    expect(uniqueWords.size).toBe(WORD_LIST.length);
+  });
+
+  it('should have a reasonable number of words for the game', () => {
+    // Need at least 36 words for a large (6x6) board
+    expect(WORD_LIST.length).toBeGreaterThanOrEqual(36);
+    // Should have plenty of variety
+    expect(WORD_LIST.length).toBeGreaterThan(400);
+  });
+});
+
 describe('getRandomWords', () => {
   it('should return the requested number of words', () => {
     const words = getRandomWords(25);
@@ -34,15 +48,13 @@ describe('getRandomWords', () => {
     expect(WORD_LIST).toContain(words[0]);
   });
 
-  it('should handle large counts up to word list size', () => {
-    // Note: WORD_LIST may contain duplicates, so we test with a safe count
-    const safeCount = 100;
-    const words = getRandomWords(safeCount);
-    expect(words).toHaveLength(safeCount);
+  it('should handle the full word list size', () => {
+    const words = getRandomWords(WORD_LIST.length);
+    expect(words).toHaveLength(WORD_LIST.length);
     
-    // All returned words should be unique
+    // Should contain all unique words from the list
     const wordSet = new Set(words);
-    expect(wordSet.size).toBe(safeCount);
+    expect(wordSet.size).toBe(WORD_LIST.length);
   });
 });
 
