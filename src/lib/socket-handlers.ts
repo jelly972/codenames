@@ -9,6 +9,13 @@ import {
   SpymasterGameState,
   CardType,
 } from '@/types/game';
+import {
+  validateNickname,
+  validateClue,
+  validateGameCode,
+  validatePlayerId,
+  validateClueCount,
+} from './validation';
 
 // Track which socket is in which room
 const socketRooms = new Map<string, string>();
@@ -89,7 +96,29 @@ export function setupSocketHandlers(io: SocketIOServer) {
     // Join a game room
     socket.on('join_room', async (data: { gameCode: string; playerId: string; playerName: string }) => {
       const { gameCode, playerId, playerName } = data;
-      const code = gameCode.toUpperCase();
+      
+      // Validate and sanitize all inputs
+      const gameCodeValidation = validateGameCode(gameCode);
+      if (!gameCodeValidation.valid) {
+        socket.emit('error', { message: gameCodeValidation.error });
+        return;
+      }
+      
+      const playerIdValidation = validatePlayerId(playerId);
+      if (!playerIdValidation.valid) {
+        socket.emit('error', { message: playerIdValidation.error });
+        return;
+      }
+      
+      const nicknameValidation = validateNickname(playerName);
+      if (!nicknameValidation.valid) {
+        socket.emit('error', { message: nicknameValidation.error });
+        return;
+      }
+      
+      const code = gameCodeValidation.sanitized;
+      const sanitizedPlayerId = playerIdValidation.sanitized;
+      const sanitizedPlayerName = nicknameValidation.sanitized;
 
       try {
         const game = await getGame(code);
@@ -99,13 +128,13 @@ export function setupSocketHandlers(io: SocketIOServer) {
         }
 
         // Check if player already exists in game
-        let player = game.players.find((p) => p.id === playerId);
+        let player = game.players.find((p) => p.id === sanitizedPlayerId);
         
         if (!player) {
           // Add new player
           player = {
-            id: playerId,
-            name: playerName,
+            id: sanitizedPlayerId,
+            name: sanitizedPlayerName,
             team: null,
             role: null,
             isHost: game.players.length === 0,
@@ -114,23 +143,23 @@ export function setupSocketHandlers(io: SocketIOServer) {
           await saveGame(game);
         } else {
           // Update player name if reconnecting
-          player.name = playerName;
+          player.name = sanitizedPlayerName;
           await saveGame(game);
         }
 
         // Join the socket room
         socket.join(code);
         socketRooms.set(socket.id, code);
-        socketPlayers.set(socket.id, { gameCode: code, playerId });
+        socketPlayers.set(socket.id, { gameCode: code, playerId: sanitizedPlayerId });
 
         // Notify others
         socket.to(code).emit('player_joined', { player });
 
         // Send current state to joining player
-        const state = getStateForPlayer(game, playerId);
+        const state = getStateForPlayer(game, sanitizedPlayerId);
         socket.emit('game_state', state);
 
-        console.log(`Player ${playerName} joined room ${code}`);
+        console.log(`Player ${sanitizedPlayerName} joined room ${code}`);
       } catch (error) {
         console.error('Error joining room:', error);
         socket.emit('error', { message: 'Failed to join game' });
@@ -300,6 +329,19 @@ export function setupSocketHandlers(io: SocketIOServer) {
       if (!playerInfo) return;
 
       const { gameCode, playerId } = playerInfo;
+      
+      // Validate and sanitize clue inputs
+      const clueValidation = validateClue(data.word);
+      if (!clueValidation.valid) {
+        socket.emit('error', { message: clueValidation.error });
+        return;
+      }
+      
+      const countValidation = validateClueCount(data.count);
+      if (!countValidation.valid) {
+        socket.emit('error', { message: countValidation.error });
+        return;
+      }
 
       try {
         const game = await getGame(gameCode);
@@ -325,16 +367,12 @@ export function setupSocketHandlers(io: SocketIOServer) {
           return;
         }
 
-        // Validate clue
-        const clueWord = data.word.trim().toUpperCase();
-        if (!clueWord || data.count < 0) {
-          socket.emit('error', { message: 'Invalid clue' });
-          return;
-        }
+        const clueWord = clueValidation.sanitized.toUpperCase();
+        const clueCount = countValidation.value;
 
-        game.currentClue = { word: clueWord, count: data.count };
+        game.currentClue = { word: clueWord, count: clueCount };
         // Allow count + 1 guesses (the +1 is for catching up)
-        game.guessesRemaining = data.count === 0 ? Infinity : data.count + 1;
+        game.guessesRemaining = clueCount === 0 ? Infinity : clueCount + 1;
         game.guessesThisTurn = 0;
         await saveGame(game);
 
