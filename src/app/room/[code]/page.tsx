@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGame } from '@/hooks/useGame';
 import { Lobby } from '@/components/Lobby';
@@ -8,30 +8,41 @@ import { GameBoard } from '@/components/GameBoard';
 import { GameOver } from '@/components/GameOver';
 import { SpectatorView } from '@/components/SpectatorView';
 
+function getPlayerInfoSnapshot(): { playerId: string; playerName: string } | null {
+  const storedPlayerId = sessionStorage.getItem('playerId');
+  const storedPlayerName = sessionStorage.getItem('playerName');
+  if (!storedPlayerId || !storedPlayerName) return null;
+  return { playerId: storedPlayerId, playerName: storedPlayerName };
+}
+
+function getServerSnapshot(): { playerId: string; playerName: string } | null {
+  return null;
+}
+
+function subscribe(): () => void {
+  // sessionStorage doesn't fire events in the same tab, so no subscription needed
+  // This is just for initial hydration
+  return () => {};
+}
+
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
   const code = (params.code as string)?.toUpperCase();
   
-  const [playerId, setPlayerId] = useState<string>('');
-  const [playerName, setPlayerName] = useState<string>('');
-  const [isReady, setIsReady] = useState(false);
+  // Use useSyncExternalStore to safely read from sessionStorage
+  const playerInfo = useSyncExternalStore(subscribe, getPlayerInfoSnapshot, getServerSnapshot);
 
-  // Load player info from session storage
+  // Redirect if no player info
   useEffect(() => {
-    const storedPlayerId = sessionStorage.getItem('playerId');
-    const storedPlayerName = sessionStorage.getItem('playerName');
-
-    if (!storedPlayerId || !storedPlayerName) {
-      // Redirect to home if no player info
+    if (playerInfo === null) {
       router.push('/');
-      return;
     }
+  }, [playerInfo, router]);
 
-    setPlayerId(storedPlayerId);
-    setPlayerName(storedPlayerName);
-    setIsReady(true);
-  }, [router]);
+  const playerId = playerInfo?.playerId ?? '';
+  const playerName = playerInfo?.playerName ?? '';
+  const isReady = playerInfo !== null;
 
   const {
     gameState,
