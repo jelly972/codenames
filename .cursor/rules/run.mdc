@@ -1,5 +1,6 @@
 ---
 alwaysApply: true
 ---
-
-when ever you need to execute node command, do not use npx, use node directly
+## run instructions
+- when ever you need to execute node command, do not use npx, use node directly
+- do not start the dev server, instead ask me to do it 
