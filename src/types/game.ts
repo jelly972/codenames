@@ -1,3 +1,6 @@
+// Language options
+export type Language = 'en' | 'he';
+
 // Board size presets
 export type BoardSize = 'small' | 'standard' | 'large';
 
@@ -27,6 +30,7 @@ export interface GameSettings {
   teamCount: 2 | 3 | 4;
   wordsPerTeam: number;
   assassinCount: number;
+  language: Language;
 }
 
 export interface Clue {
@@ -79,7 +83,8 @@ export interface Player {
 // Default settings based on board size and team count
 export function getDefaultSettings(
   boardSize: BoardSize = 'standard',
-  teamCount: 2 | 3 | 4 = 2
+  teamCount: 2 | 3 | 4 = 2,
+  language: Language = 'en'
 ): GameSettings {
   const totalCards = BOARD_DIMENSIONS[boardSize] ** 2;
 
@@ -95,6 +100,7 @@ export function getDefaultSettings(
     teamCount,
     wordsPerTeam: wordsPerTeamDefaults[boardSize][teamCount],
     assassinCount: boardSize === 'large' ? 2 : 1,
+    language,
   };
 }
 

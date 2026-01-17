@@ -8,6 +8,7 @@ import {
   TeamId,
   GameSettings,
   BoardSize,
+  Language,
   TEAM_COLORS,
   TEAM_ORDER,
   BOARD_DIMENSIONS,
@@ -44,13 +45,17 @@ export function Lobby({
   };
 
   const handleBoardSizeChange = (size: BoardSize) => {
-    const newSettings = getDefaultSettings(size, gameState.settings.teamCount);
+    const newSettings = getDefaultSettings(size, gameState.settings.teamCount, gameState.settings.language);
     onUpdateSettings(newSettings);
   };
 
   const handleTeamCountChange = (count: 2 | 3 | 4) => {
-    const newSettings = getDefaultSettings(gameState.settings.boardSize, count);
+    const newSettings = getDefaultSettings(gameState.settings.boardSize, count, gameState.settings.language);
     onUpdateSettings(newSettings);
+  };
+
+  const handleLanguageChange = (language: Language) => {
+    onUpdateSettings({ language });
   };
 
   // Check if all teams have spymasters
@@ -139,6 +144,25 @@ export function Lobby({
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm text-[#9ca3af] mb-2">Language</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['en', 'he'] as Language[]).map((lang) => (
+                        <button
+                          key={lang}
+                          onClick={() => handleLanguageChange(lang)}
+                          className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                            gameState.settings.language === lang
+                              ? 'bg-[var(--accent)] text-white'
+                              : 'bg-[var(--background)] border border-[var(--card-border)] hover:border-[var(--accent)]'
+                          }`}
+                        >
+                          {lang === 'en' ? '🇬🇧 English' : '🇮🇱 עברית'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="pt-2 border-t border-[var(--card-border)]">
                     <div className="text-sm text-[#6b7280] space-y-1">
                       <p>Cards: {BOARD_DIMENSIONS[gameState.settings.boardSize] ** 2}</p>
@@ -152,6 +176,7 @@ export function Lobby({
                   <p>Board: {gameState.settings.boardSize} ({BOARD_DIMENSIONS[gameState.settings.boardSize]}×{BOARD_DIMENSIONS[gameState.settings.boardSize]})</p>
                   <p>Teams: {gameState.settings.teamCount}</p>
                   <p>Cards per team: {gameState.settings.wordsPerTeam}</p>
+                  <p>Language: {gameState.settings.language === 'en' ? '🇬🇧 English' : '🇮🇱 עברית'}</p>
                   <p className="text-[#4b5563] italic mt-4">Only the host can change settings</p>
                 </div>
               )}

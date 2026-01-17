@@ -5,11 +5,20 @@ import {
   TeamId,
   CardType,
   TeamScore,
+  Language,
   BOARD_DIMENSIONS,
   TEAM_ORDER,
   getDefaultSettings,
 } from '@/types/game';
 import { getRandomWords } from './words';
+import { getRandomHebrewWords } from './words-he';
+
+/**
+ * Get random words based on the specified language
+ */
+function getRandomWordsByLanguage(count: number, language: Language): string[] {
+  return language === 'he' ? getRandomHebrewWords(count) : getRandomWords(count);
+}
 
 /**
  * Generate a unique 6-character room code
@@ -100,7 +109,7 @@ export function createGame(
     settings: fullSettings,
     
     // Board state - will be populated when game starts
-    words: getRandomWords(totalCards),
+    words: getRandomWordsByLanguage(totalCards, fullSettings.language),
     keyCard: generateKeyCard(fullSettings),
     revealed: new Array(totalCards).fill(false),
     
@@ -132,7 +141,7 @@ export function regenerateBoard(game: Game): Game {
   
   return {
     ...game,
-    words: getRandomWords(totalCards),
+    words: getRandomWordsByLanguage(totalCards, game.settings.language),
     keyCard: generateKeyCard(game.settings),
     revealed: new Array(totalCards).fill(false),
     currentTeamIndex: 0,
