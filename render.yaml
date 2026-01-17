@@ -3,7 +3,7 @@ services:
     name: codename
     runtime: node
     plan: free # or starter, standard, etc.
-    buildCommand: npm install &&npm ci && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
